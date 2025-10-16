@@ -33,11 +33,12 @@ internal class ShoppingListStore
         using var cmd = conn.CreateCommand();
 
         cmd.BindByName = true;
-        cmd.CommandText = @"INSERT INTO fs231_aretzer.grocery_lists (list_id, user_id, list_name)
-                            VALUES (seq_grocery_lists.NEXTVAL, :userId, :listName)";
+        cmd.CommandText = @"INSERT INTO fs231_aretzer.grocery_lists (user_id, list_name)
+                            VALUES (:userId, :listName)";
+        //cmd.Parameters.Add(":listId", OracleDbType.Int32).Value = list.ListId;
         cmd.Parameters.Add(":userId", OracleDbType.Int32).Value = list.UserId;
-        cmd.Parameters.Add(":itemId", OracleDbType.Int32).Value = list.Items.FirstOrDefault()?.ItemId ?? 0;
         cmd.Parameters.Add(":listName", OracleDbType.Varchar2, 50).Value = list.ListName;
+
 
 
         return cmd.ExecuteNonQuery() > 0;
