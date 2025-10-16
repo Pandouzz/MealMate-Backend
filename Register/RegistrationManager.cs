@@ -24,7 +24,7 @@ internal static class RegistrationManager
 
             if (!string.IsNullOrWhiteSpace(req.Password))
             {
-                var result = PasswordHasher.ComputerHash(req.Password);
+                var result = PasswordHasher.ComputeHash(req.Password);
                 finalHash = result.Hash;
                 finalSalt = result.Salt;
             }
