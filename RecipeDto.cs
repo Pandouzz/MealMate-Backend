@@ -9,5 +9,5 @@ public class RecipeDto
     public string Anleitung { get; set; }
     public bool Vegetarisch { get; set; }
     public bool Vegan { get; set; }
-    public List<string> Zutaten { get; set; }
+    public List<ZutatDto> Zutaten { get; set; } = new(); // ← Geändert von List<string>
 }

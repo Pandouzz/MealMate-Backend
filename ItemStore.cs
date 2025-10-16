@@ -20,8 +20,7 @@ internal class ItemStore
             {
                 ItemId = reader.GetInt32(reader.GetOrdinal("item_id")),
                 ItemName = reader.GetString(reader.GetOrdinal("item_name")),
-                Category = !reader.IsDBNull(reader.GetOrdinal("category")) 
-                    ? reader.GetString(reader.GetOrdinal("category")) : ""
+                Category = "" // ← Leerer String, da Spalte nicht mehr existiert
             };
         }
 
@@ -30,7 +29,6 @@ internal class ItemStore
 
     public static Item GetOrCreateItem(string itemName)
     {
-        // Zuerst versuchen zu finden
         using var conn = DbConnectionHelper.Connect();
         using var cmd = conn.CreateCommand();
 
@@ -46,8 +44,7 @@ internal class ItemStore
             {
                 ItemId = reader.GetInt32(reader.GetOrdinal("item_id")),
                 ItemName = reader.GetString(reader.GetOrdinal("item_name")),
-                Category = !reader.IsDBNull(reader.GetOrdinal("category")) 
-                    ? reader.GetString(reader.GetOrdinal("category")) : ""
+                Category = "" // ← Leerer String
             };
         }
 
@@ -55,8 +52,8 @@ internal class ItemStore
 
         // Wenn nicht gefunden, erstellen
         cmd.CommandText = @"
-            INSERT INTO items (item_name, category)
-            VALUES (:itemName, 'Sonstiges')
+            INSERT INTO items (item_name)
+            VALUES (:itemName)
             RETURNING item_id INTO :itemId";
 
         cmd.Parameters.Clear();
@@ -72,7 +69,7 @@ internal class ItemStore
         {
             ItemId = ((OracleDecimal)itemIdParam.Value).ToInt32(),
             ItemName = itemName,
-            Category = "Sonstiges"
+            Category = "" // ← Leerer String
         };
     }
 }

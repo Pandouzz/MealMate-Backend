@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class RecipesController : ControllerBase
 {
-
     [HttpGet]
     public ActionResult<List<RecipeDto>> GetAllRecipes([FromQuery] int? userId)
     {
@@ -50,6 +49,8 @@ public class RecipesController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"FEHLER: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
             return StatusCode(500, $"Fehler beim Erstellen des Rezepts: {ex.Message}");
         }
     }
@@ -92,11 +93,16 @@ public class RecipesController : ControllerBase
 
     private RecipeDto MapToDto(Recipe recipe)
     {
-        var ingredientStrings = recipe.Ingredients?.Select(ing => 
+        var zutatenDtos = recipe.Ingredients?.Select(ing => 
         {
             var item = ItemStore.GetItemById(ing.ItemId);
-            return $"{ing.Amount}{ing.Unit} {item?.ItemName ?? "unbekannt"}";
-        }).ToList() ?? new List<string>();
+            return new ZutatDto
+            {
+                Zutat = item?.ItemName ?? "unbekannt",
+                Menge = ing.Amount,
+                Einheit = ing.Unit
+            };
+        }).ToList() ?? new List<ZutatDto>();
 
         return new RecipeDto
         {
@@ -109,7 +115,7 @@ public class RecipesController : ControllerBase
             Anleitung = recipe.Instructions,
             Vegetarisch = recipe.Vegetarian,
             Vegan = recipe.Vegan,
-            Zutaten = ingredientStrings
+            Zutaten = zutatenDtos
         };
     }
 
@@ -136,7 +142,7 @@ public class RecipesController : ControllerBase
         var recipe = new Recipe
         {
             RecipeId = dto.Id,
-            UserId = 1, // TODO: Aus Authentication Context holen
+            UserId = 5, // TODO: Aus Authentication Context holen
             RecipeName = dto.Titel,
             Description = dto.Beschreibung,
             Instructions = dto.Anleitung ?? "",
@@ -149,55 +155,24 @@ public class RecipesController : ControllerBase
             Ingredients = new List<Ingredient>()
         };
 
-        // Zutaten parsen
+        // Zutaten verarbeiten (jetzt strukturiert!)
         if (dto.Zutaten != null)
         {
-            foreach (var zutatStr in dto.Zutaten)
+            foreach (var zutatDto in dto.Zutaten)
             {
-                if (!string.IsNullOrWhiteSpace(zutatStr))
+                if (!string.IsNullOrWhiteSpace(zutatDto.Zutat))
                 {
-                    var ingredient = ParseIngredient(zutatStr);
-                    if (ingredient != null)
+                    var item = ItemStore.GetOrCreateItem(zutatDto.Zutat);
+                    recipe.Ingredients.Add(new Ingredient
                     {
-                        recipe.Ingredients.Add(ingredient);
-                    }
+                        ItemId = item.ItemId,
+                        Amount = (int)zutatDto.Menge,
+                        Unit = zutatDto.Einheit ?? ""
+                    });
                 }
             }
         }
 
         return recipe;
-    }
-
-    private Ingredient ParseIngredient(string zutatStr)
-    {
-        // Einfaches Parsing: "200g Mehl" -> Amount=200, Unit=g, Item=Mehl
-        var match = System.Text.RegularExpressions.Regex.Match(zutatStr, @"^(\d+)\s*([a-zA-Z]*)\s*(.+)$");
-        
-        if (match.Success)
-        {
-            int amount = int.Parse(match.Groups[1].Value);
-            string unit = match.Groups[2].Value;
-            string itemName = match.Groups[3].Value.Trim();
-
-            var item = ItemStore.GetOrCreateItem(itemName);
-
-            return new Ingredient
-            {
-                ItemId = item.ItemId,
-                Amount = amount,
-                Unit = unit
-            };
-        }
-        else
-        {
-            // Kein Match - erstelle Item ohne Menge
-            var item = ItemStore.GetOrCreateItem(zutatStr.Trim());
-            return new Ingredient
-            {
-                ItemId = item.ItemId,
-                Amount = 0,
-                Unit = ""
-            };
-        }
     }
 }
