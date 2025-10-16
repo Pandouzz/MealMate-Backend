@@ -5,4 +5,8 @@ public class User
     public string LastName { get; set; }
     public string Email { get; set; }
     public string PwHash { get; set; }
+
+    public string? ImageUrl { get; set; }
+
+    public string Salt { get; set; }
 }
