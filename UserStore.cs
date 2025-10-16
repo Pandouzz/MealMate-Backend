@@ -66,12 +66,12 @@ internal class UserStore
 
         var imgParam = new OracleParameter(":image_url", OracleDbType.Varchar2, 255);
         if (string.IsNullOrWhiteSpace(user.ImageUrl))
-            imgParam.Value = DBNull.Value;     // IMAGE_URL ist NULL-able
+            imgParam.Value = DBNull.Value;     
         else
             imgParam.Value = user.ImageUrl;
         cmd.Parameters.Add(imgParam);
 
-        cmd.Parameters.Add(":salt", OracleDbType.Varchar2, 50).Value = user.Salt; // NOT NULL
+        cmd.Parameters.Add(":salt", OracleDbType.Varchar2, 50).Value = user.Salt; 
 
         var outParam = new OracleParameter(":new_id", OracleDbType.Int32)
         {
@@ -86,7 +86,6 @@ internal class UserStore
         }
         catch (OracleException ox) when (ox.Number == 1) 
         {
-            //throw new InvalidOperationException("E-Mail bereits vergeben.", ox);
             return -1;
         }
     }
