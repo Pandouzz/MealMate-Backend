@@ -5,18 +5,31 @@ using System.Text;
 class PasswordHasher
 {
     static Random rand = new Random();
-    public static PwHashResult ComputerHash(string pw)
+    public static PwHashResult ComputeHash(string pw)
     {
-        SHA256 sha = SHA256.Create();
-        string salt = GenerateSalt();
-        byte[] byteArray = Encoding.UTF8.GetBytes(pw + salt);
-        byteArray = sha.ComputeHash(byteArray);
-        string hexString = Convert.ToHexString(byteArray);
-        return new PwHashResult { Hash = hexString, Salt = salt };
+        using (SHA256 sha = SHA256.Create())
+        {
+            string salt = GenerateSalt();
+            byte[] byteArray = Encoding.UTF8.GetBytes(pw + salt);
+            byteArray = sha.ComputeHash(byteArray);
+            string hexString = Convert.ToHexString(byteArray);
+            return new PwHashResult { Hash = hexString, Salt = salt };
+        }
+    }
+
+    public static string ComputeHashWithSalt(string pw, string salt)
+    {
+        using (SHA256 sha = SHA256.Create())
+        {
+            byte[] byteArray = Encoding.UTF8.GetBytes(pw + salt);
+            byteArray = sha.ComputeHash(byteArray);
+            string hexString = Convert.ToHexString(byteArray);
+            return hexString;
+        }
     }
 
     public static string GenerateSalt(int minLength = 12, int maxLength = 24)
-    { 
+    {
         int len = rand.Next(minLength, maxLength + 1);
         byte[] saltBytes = new byte[len];
         var rng = RandomNumberGenerator.Create();
@@ -28,6 +41,6 @@ class PasswordHasher
     {
         public string Hash { get; set; }
         public string Salt { get; set; }
-        
+
     }
 }

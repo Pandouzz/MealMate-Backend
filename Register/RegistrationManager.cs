@@ -9,18 +9,11 @@ internal static class RegistrationManager
 
             if (UserStore.EmailExists(req.Email))
                 return RegisterResult.Fail("E-Mail existiert bereits.", RegistrationError.EmailAlreadyExists);
-                
-
-
-
 
             var salt = string.IsNullOrWhiteSpace(req.Salt)
-                ? Convert.ToBase64String(Guid.NewGuid().ToByteArray())   
+                ? Convert.ToBase64String(Guid.NewGuid().ToByteArray())
                 : req.Salt!;
-
-
-
-
+                
             var user = new User
             {
                 FirstName = req.FirstName,
@@ -31,8 +24,6 @@ internal static class RegistrationManager
                 Salt = salt
             };
             
-
-
             int newId = UserStore.CreateUser(user);
 
             if (newId == -1)
@@ -64,8 +55,5 @@ internal readonly struct RegisterResult
 
     public static RegisterResult Ok (int id) => new RegisterResult(true, id, "", RegistrationError.None);
     public static RegisterResult Fail (string msg, RegistrationError code = RegistrationError.None)
-        => new RegisterResult(false, 0, msg, code);
-
-
-        
+        => new RegisterResult(false, 0, msg, code);     
 }

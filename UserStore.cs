@@ -22,7 +22,9 @@ internal class UserStore
                 FirstName = reader.GetString(reader.GetOrdinal("first_name")),
                 LastName = reader.GetString(reader.GetOrdinal("last_name")),
                 Email = reader.GetString(reader.GetOrdinal("email")),
-                PwHash = reader.GetString(reader.GetOrdinal("pw_hash"))
+                PwHash = reader.GetString(reader.GetOrdinal("pw_hash")),
+                Salt = reader.GetString(reader.GetOrdinal("salt")),
+                ImageUrl = reader.IsDBNull(reader.GetOrdinal("image_url")) ? null : reader.GetString(reader.GetOrdinal("image_url"))
             };
         }
         else
@@ -62,8 +64,6 @@ internal class UserStore
         cmd.Parameters.Add(":email"     , OracleDbType.Varchar2, 50).Value = user.Email;
         cmd.Parameters.Add(":pw_hash"   , OracleDbType.Varchar2, 200).Value = user.PwHash;
 
-
-
         var imgParam = new OracleParameter(":image_url", OracleDbType.Varchar2, 255);
         if (string.IsNullOrWhiteSpace(user.ImageUrl))
             imgParam.Value = DBNull.Value;     // IMAGE_URL ist NULL-able
@@ -72,9 +72,6 @@ internal class UserStore
         cmd.Parameters.Add(imgParam);
 
         cmd.Parameters.Add(":salt", OracleDbType.Varchar2, 50).Value = user.Salt; // NOT NULL
-
-
-
 
         var outParam = new OracleParameter(":new_id", OracleDbType.Int32)
         {

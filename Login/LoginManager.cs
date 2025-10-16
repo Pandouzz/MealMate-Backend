@@ -1,13 +1,17 @@
 internal class LogingManager
 {
-    public static bool Login(string email, string pwHash)
+    public static bool Login(string enteredEmail, string enteredPw)
     {
-        User queriedUser = UserStore.TraceUser(email);
+        User queriedDbUser = UserStore.TraceUser(enteredEmail);
 
-        if (queriedUser != null)
+        if (queriedDbUser != null)
         {
-            Console.WriteLine("Nutzer erfolgreich angemeldet!");
-            return queriedUser.PwHash == pwHash;
+            Console.WriteLine("Nutzer konnte gefunden werden!");
+
+            string saltedPw = enteredPw + queriedDbUser.Salt;
+            string enteredPwHash = PasswordHasher.ComputeHashWithSalt(saltedPw, queriedDbUser.Salt);
+
+            return queriedDbUser.PwHash == enteredPwHash;
         }
         else
         {
