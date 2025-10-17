@@ -60,6 +60,21 @@ public class RecipesController : ControllerBase
     {
         try
         {
+            // Debug: Zeige empfangene Daten
+            Console.WriteLine($"=== UPDATE REQUEST ===");
+            Console.WriteLine($"ID: {id}");
+            Console.WriteLine($"RecipeDto: {System.Text.Json.JsonSerializer.Serialize(recipeDto)}");
+            Console.WriteLine($"ModelState Valid: {ModelState.IsValid}");
+            
+            if (!ModelState.IsValid)
+            {
+                foreach (var error in ModelState)
+                {
+                    Console.WriteLine($"Validation Error - Key: {error.Key}, Errors: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                }
+                return BadRequest(ModelState);
+            }
+            
             var recipe = MapToEntity(recipeDto);
             recipe.RecipeId = id;
             var updatedRecipe = RecipeStore.UpdateRecipe(recipe);
@@ -70,6 +85,8 @@ public class RecipesController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"FEHLER: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
             return StatusCode(500, $"Fehler beim Aktualisieren des Rezepts: {ex.Message}");
         }
     }

@@ -1,8 +1,8 @@
 public class ZutatDto
 {
-    public string Zutat { get; set; } = "";
+    public string? Zutat { get; set; }
     public double Menge { get; set; }
-    public string Einheit { get; set; } = "";
+    public string? Einheit { get; set; }
 }
 
 /**
