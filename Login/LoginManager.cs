@@ -8,8 +8,7 @@ internal class LogingManager
         {
             Console.WriteLine("Nutzer konnte gefunden werden!");
 
-            string saltedPw = enteredPw + queriedDbUser.Salt;
-            string enteredPwHash = PasswordHasher.ComputeHashWithSalt(saltedPw, queriedDbUser.Salt);
+            string enteredPwHash = PasswordHasher.ComputeHashWithSalt(enteredPw, queriedDbUser.Salt);
 
             return queriedDbUser.PwHash == enteredPwHash;
         }
