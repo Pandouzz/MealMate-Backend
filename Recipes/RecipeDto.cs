@@ -9,5 +9,6 @@ public class RecipeDto
     public string? Anleitung { get; set; }
     public bool Vegetarisch { get; set; }
     public bool Vegan { get; set; }
+    public bool IstFavorit { get; set; }
     public List<ZutatDto>? Zutaten { get; set; }
 }

@@ -110,6 +110,9 @@ public class RecipesController : ControllerBase
 
     private RecipeDto MapToDto(Recipe recipe)
     {
+        int userId = 3; // TODO: Aus Authentication Context holen
+        bool istFavorit = FavoriteStore.IsFavorite(userId, recipe.RecipeId);
+        
         var zutatenDtos = recipe.Ingredients?.Select(ing => 
         {
             var item = ItemStore.GetItemById(ing.ItemId);
@@ -132,6 +135,7 @@ public class RecipesController : ControllerBase
             Anleitung = recipe.Instructions,
             Vegetarisch = recipe.Vegetarian,
             Vegan = recipe.Vegan,
+            IstFavorit = istFavorit,
             Zutaten = zutatenDtos
         };
     }
@@ -159,7 +163,7 @@ public class RecipesController : ControllerBase
         var recipe = new Recipe
         {
             RecipeId = dto.Id,
-            UserId = 5, // TODO: Aus Authentication Context holen
+            UserId = 3, // TODO: Aus Authentication Context holen
             RecipeName = dto.Titel,
             Description = dto.Beschreibung,
             Instructions = dto.Anleitung ?? "",
@@ -192,4 +196,35 @@ public class RecipesController : ControllerBase
 
         return recipe;
     }
+
+    [HttpPost("{id}/favorite")]
+    public ActionResult SetFavorite(int id, [FromBody] FavoriteRequest request)
+    {
+        try
+        {
+            int userId = 3; // TODO: Aus Authentication Context holen
+            
+            if (request.IsFavorite)
+            {
+                FavoriteStore.AddFavorite(userId, id);
+            }
+            else
+            {
+                FavoriteStore.RemoveFavorite(userId, id);
+            }
+            
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"FEHLER: {ex.Message}");
+            return StatusCode(500, $"Fehler beim Setzen des Favoriten-Status: {ex.Message}");
+        }
+    }
+
+}
+
+public class FavoriteRequest
+{
+    public bool IsFavorite { get; set; }
 }
